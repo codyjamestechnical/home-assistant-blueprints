@@ -2,6 +2,9 @@ blueprint:
   name: Battery Alerts
   description: Sent notifications when battery levels are low or critical.
   domain: automation
+  author: Cody James
+  homeassistant:
+    min_version: 2024.6.0
   input:
     battery_sensors:
       name: Battery Sensors
@@ -58,7 +61,7 @@ actions:
         sequence:
           - parallel:
               !input unavailable_actions
-              
+
       - conditions:
           - "{{ trigger.id in ['battery_low_20', 'battery_low_10', 'battery_low_5'] }}"
         sequence:
