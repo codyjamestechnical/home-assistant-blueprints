@@ -58,7 +58,7 @@ actions:
         sequence:
           - parallel:
               !input unavailable_actions
-    default:
+              
       - conditions:
           - "{{ trigger.id in ['battery_low_20', 'battery_low_10', 'battery_low_5'] }}"
         sequence:
