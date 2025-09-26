@@ -1,0 +1,67 @@
+blueprint:
+  name: Battery Alerts
+  description: Sent notifications when battery levels are low or critical.
+  domain: automation
+  input:
+    battery_sensors:
+      name: Battery Sensors
+      description: List of battery sensors to monitor.
+      selector:
+        entity:
+          domain: sensor
+          device_class: battery
+          multiple: true
+    low_battery_actions:
+      name: Low Battery Actions
+      description: Actions to perform when battery is below 20%, 10, or 5%.
+      default: []
+      selector:
+        action: {}
+    unavailable_actions:
+      name: Unavailable Sensor Actions
+      description: Actions to perform when a sensor becomes unavailable.
+      default: []
+      selector:
+        action: {}
+
+triggers:
+  - platform: numeric_state
+    id: battery_low_20
+    entity_id: !input battery_sensors
+    below: 20
+    for: "00:05:00"
+
+  - platform: numeric_state
+    id: battery_low_10
+    entity_id: !input battery_sensors
+    below: 10
+    for: "00:05:00"
+
+  - platform: numeric_state
+    id: battery_low_5
+    entity_id: !input battery_sensors
+    below: 5
+    for: "00:05:00"
+
+  - platform: state
+    id: sensor_unavailable
+    entity_id: !input battery_sensors
+    to: 
+      - "unavailable"
+      - "unknown"
+    for: "00:05:00"
+
+actions:
+  - choose:
+      - conditions:
+          - "{{ trigger.id == 'sensor_unavailable' }}"
+        sequence:
+          - parallel:
+              !input unavailable_actions
+    default:
+      - conditions:
+          - "{{ trigger.id in ['battery_low_20', 'battery_low_10', 'battery_low_5'] }}"
+        sequence:
+          - parallel:
+              !input low_battery_actions
+mode: parallel
